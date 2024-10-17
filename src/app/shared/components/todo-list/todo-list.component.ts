@@ -1,33 +1,53 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { TodoCardComponent } from './../todo-card/todo-card.component';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { GetToDoListResponse } from '../../models/getToDoListResponse';
 
 @Component({
   selector: 'app-todo-list',
   standalone: true,
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule, TodoCardComponent],
   templateUrl: './todo-list.component.html',
-  styleUrl: './todo-list.component.scss'
+  styleUrl: './todo-list.component.scss',
 })
-export class TodoListComponent {
+export class TodoListComponent implements OnInit {
+  todoList: string[] = [];
+  newTodo: string = '';
+  toDoListFromBackend: GetToDoListResponse[] = [];
+  // Dependency Injection
+  constructor(private httpClient: HttpClient) {}
 
-  todoList : string[] = [];
-  input : string = "";
+  ngOnInit() {
+    this.fetchTodos();
+  }
 
-  
-  onSubmit(): void {
-    if (!this.checkSameTodoName(this.input)) {
-      this.todoList.push(this.input);
-      
-    } else {
-      alert('Girdiğiniz TODO bulunmaktadır.');
-    }
-    this.input = "";
+  add(): void {
+    const existingItem = this.todoList.find((i) => i == this.newTodo);
+    if (!existingItem && this.newTodo.trim().length > 0)
+      this.todoList.push(this.newTodo);
+    this.newTodo = '';
   }
-  deleteTodo(index : number){
-    this.todoList.splice(index,1);
+
+  remove(todo: string) {
+    this.todoList = this.todoList.filter((i) => i !== todo);
   }
-  checkSameTodoName(todo : string): boolean{
-    return this.todoList.includes(todo)
+
+  fetchTodos() {
+    // Async, Observable, Subscribe
+    this.httpClient
+      .get<GetToDoListResponse[]>('https://jsonplaceholder.typicode.com/todos')
+      .subscribe({
+        next: (response: GetToDoListResponse[]) => {
+          this.toDoListFromBackend = response;
+        },
+        error: (err: any) => {
+          console.log('HATA', err);
+        },
+        complete: () => {
+          console.log('istek başarılı bitti');
+        },
+      });
+    // RxJs observable
   }
 }
