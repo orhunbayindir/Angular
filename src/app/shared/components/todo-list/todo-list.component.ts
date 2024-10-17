@@ -14,6 +14,15 @@ import { GetToDoListResponse } from '../../models/getToDoListResponse';
 export class TodoListComponent implements OnInit {
   todoList: string[] = [];
   newTodo: string = '';
+
+  todoRequest: GetToDoListResponse = {
+    userId: 0,  
+    id: 0,      
+    title: '',
+    completed: false,
+  };
+
+
   toDoListFromBackend: GetToDoListResponse[] = [];
   // Dependency Injection
   constructor(private httpClient: HttpClient) {}
@@ -27,6 +36,22 @@ export class TodoListComponent implements OnInit {
     if (!existingItem && this.newTodo.trim().length > 0)
       this.todoList.push(this.newTodo);
     this.newTodo = '';
+  }
+
+  getTodo(id: number) {
+    this.httpClient
+      .get<GetToDoListResponse>(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      .subscribe({
+        next: (response: GetToDoListResponse) => {
+          console.log('Başarılı:', response);
+        },
+        error: (err: any) => {
+          console.log('HATA', err);
+        },
+        complete: () => {
+          console.log('İstek başarılı bitti');
+        },
+      });
   }
 
   remove(todo: string) {
@@ -49,5 +74,39 @@ export class TodoListComponent implements OnInit {
         },
       });
     // RxJs observable
+  }
+
+  createTodo() {
+    this.httpClient
+      .post<GetToDoListResponse>('https://jsonplaceholder.typicode.com/todos', this.todoRequest)
+      .subscribe({
+        next: (response: GetToDoListResponse) => {
+          console.log('Başarılı:', response);
+        },
+        error: (err: any) => {
+          console.log('HATA', err);
+        },
+        complete: () => {
+          console.log('İstek başarılı bitti');
+        },
+      });
+  }
+
+
+
+  deleteTodo(id: number) {
+    this.httpClient
+      .delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      .subscribe({
+        next: () => {
+          this.toDoListFromBackend = this.toDoListFromBackend.filter(todo => todo.id !== id);
+        },
+        error: (err: any) => {
+          console.log('HATA', err);
+        },
+        complete: () => {
+          console.log('Silme isteği başarılı');
+        },
+      });
   }
 }

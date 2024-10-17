@@ -2,12 +2,22 @@
 <label>To-Do Giriniz</label>
 <input placeholder="Todo..." [(ngModel)]="newTodo" />
 <button class="btn btn-primary" (click)="add()">Ekle</button>
+
+<label>ID Giriniz</label>
+<input type="number" placeholder="ID" [(ngModel)]="todoRequest.userId" />
+
+<label>Başlık Giriniz</label>
+<input placeholder="Başlık" [(ngModel)]="todoRequest.title" />
+
+<button class="btn btn-primary" (click)="createTodo()">Ekle</button>
+
 <div class="row">
   @for(todo of toDoListFromBackend; track todo; let i = $index) {
   <div class="col-2">
     <app-todo-card
       [toDoFromOtherPage]="todo.title"
       (onRemoveClick)="remove($event)"
+      [todoId]="todo.id"
     />
   </div>
 
